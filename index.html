@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Brian Mugambi: IT support, networking and web development. Portfolio.">
+<title>Brian Mugambi</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style>
+/* Layout: terminal-style one-pager. Sticky bar, hero with whoami prompt and status panel, then numbered sections (index + label, big statement, content). Background: fixed canvas of drifting network nodes, white on black. Dark first, light as the alternate. */
+:root {
+  --bg: #0f0f0d;
+  --surface: #171715;
+  --ink: #f2f1ec;
+  --muted: #9a9890;
+  --line: #2d2c28;
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f6f5f1; --surface: #ffffff; --ink: #0f0f0d; --muted: #5f5d56; --line: #d8d6ce;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f6f5f1; --surface: #ffffff; --ink: #0f0f0d; --muted: #5f5d56; --line: #d8d6ce;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1.65;
+  padding-block: 0 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+a { color: inherit; text-underline-offset: 4px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.wrap { position: relative; z-index: 1; max-width: 1040px; margin: 0 auto; }
+#net { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+/* sticky bar */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; background: var(--bg); border-bottom: 1px solid var(--line); margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px)); }
+.bar .id { font-size: 13px; font-weight: 700; text-decoration: none; }
+.bar .id span { color: var(--muted); font-weight: 400; }
+.links { display: flex; align-items: center; gap: 22px; font-size: 13px; }
+.links a { text-decoration: none; color: var(--muted); }
+.links a:hover { color: var(--ink); text-decoration: underline; }
+.menu-btn { display: none; font: 500 13px var(--font-mono); color: var(--ink); background: transparent; border: 1px solid var(--ink); padding: 6px 14px; cursor: pointer; }
+
+/* overlay menu */
+.overlay { position: fixed; inset: 0; z-index: 40; background: var(--bg); padding: calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; overflow-y: auto; }
+.overlay .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 36px; font-size: 13px; }
+.overlay ol { list-style: none; margin: 0; padding: 0; display: grid; }
+.overlay li a { display: flex; gap: 18px; align-items: baseline; padding: 14px 0; border-bottom: 1px solid var(--line); text-decoration: none; font-family: var(--font-display); font-weight: 800; font-size: clamp(1.8rem, 8vw, 2.6rem); line-height: 1.1; }
+.overlay li a i { font-family: var(--font-mono); font-style: normal; font-weight: 400; font-size: 13px; color: var(--muted); }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 40px 56px; align-items: end; padding-block: 64px 56px; }
+.prompt { color: var(--muted); font-size: 13px; margin: 0 0 22px; overflow-wrap: anywhere; }
+.prompt b { color: var(--ink); font-weight: 500; }
+.cursor { display: inline-block; width: .55em; height: 1em; background: var(--ink); vertical-align: -.15em; margin-left: 4px; }
+.kicker { font-size: 13px; margin: 0 0 10px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(3rem, 10.5vw, 6.6rem); line-height: .92; letter-spacing: -.035em; margin: 0 0 24px; text-wrap: balance; }
+.intro { font-size: 1.05rem; max-width: 46ch; margin: 0 0 30px; color: var(--ink); }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn { font: 500 14px var(--font-mono); padding: 11px 20px; border: 1px solid var(--ink); color: var(--ink); background: transparent; text-decoration: none; cursor: pointer; display: inline-block; }
+.btn.solid { background: var(--ink); color: var(--bg); }
+.btn:hover { background: var(--ink); color: var(--bg); }
+.btn.solid:hover { background: transparent; color: var(--ink); }
+
+.status { background: var(--surface); border: 1px solid var(--line); padding: 4px 18px; font-size: 13px; }
+.status .head { display: flex; justify-content: space-between; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); margin-right: 8px; }
+.status dl { margin: 0; }
+.status .r { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 12px; padding: 12px 0; }
+.status .r + .r { border-top: 1px dashed var(--line); }
+.status dt { color: var(--muted); }
+.status dd { margin: 0; }
+.scroll { grid-column: 1 / -1; color: var(--muted); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+
+/* sections */
+.sec { padding-block: 72px; border-top: 1px solid var(--line); }
+.sec-head { display: flex; gap: 14px; align-items: baseline; font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+.sec-head .idx { color: var(--ink); font-weight: 700; }
+.sec-head .lab { text-transform: uppercase; letter-spacing: .12em; }
+h2 { font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 5.6vw, 3.6rem); line-height: 1; letter-spacing: -.025em; margin: 0 0 32px; max-width: 18ch; text-wrap: balance; }
+.sec p { max-width: 66ch; margin: 0 0 16px; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0; margin-top: 36px; border: 1px solid var(--line); background: var(--surface); }
+.stat { padding: 20px; border-right: 1px solid var(--line); }
+.stat:last-child { border-right: 0; }
+.stat b { display: block; font-family: var(--font-display); font-weight: 800; font-size: 2.6rem; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.stat span { display: block; margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+
+.exp { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 8px 28px; padding-block: 28px; border-top: 1px solid var(--line); }
+.exp:last-of-type { border-bottom: 1px solid var(--line); }
+.exp .n { font-size: 13px; color: var(--muted); }
+.exp .n b { display: block; color: var(--ink); font-weight: 700; }
+.exp h3 { font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; line-height: 1.15; letter-spacing: -.015em; margin: 0; }
+.exp .org { margin: 4px 0 12px; color: var(--muted); font-size: 13.5px; }
+.tag { display: inline-block; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--line); padding: 1px 8px; margin-left: 8px; color: var(--ink); vertical-align: 1px; }
+.exp ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; max-width: 66ch; }
+.exp li { padding-left: 22px; position: relative; }
+.exp li::before { content: ">"; position: absolute; left: 0; color: var(--muted); }
+
+.projects { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+.proj { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); padding: 26px; }
+.proj:hover { border-color: var(--ink); }
+.proj .top { display: flex; justify-content: space-between; width: 100%; gap: 12px; font-size: 12.5px; color: var(--muted); }
+.proj h3 { font-family: var(--font-display); font-weight: 800; font-size: 1.9rem; line-height: 1.05; letter-spacing: -.02em; margin: 0; }
+.proj .repo { margin: 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.proj .btn { margin-top: 12px; }
+.more { margin-top: 28px; color: var(--muted); }
+
+.tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 24px; }
+.term { background: var(--surface); border: 1px solid var(--line); padding: 20px; }
+.term .cmd { margin: 0 0 14px; font-size: 13px; color: var(--muted); }
+.term .cmd b { color: var(--ink); font-weight: 500; }
+.term ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.term li { border: 1px solid var(--line); padding: 2px 10px; font-size: 12.5px; }
+
+.tree-box { background: var(--surface); border: 1px solid var(--line); padding: 22px; overflow-x: auto; }
+.tree { margin: 0; font: 400 13.5px/1.8 var(--font-mono); white-space: pre; }
+.tree em { font-style: normal; color: var(--muted); }
+.edu-note { margin-top: 26px; }
+
+.contact { background: var(--ink); color: var(--bg); padding: 32px; }
+.contact .big { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.4rem, 4.6vw, 2.4rem); letter-spacing: -.02em; line-height: 1.15; overflow-wrap: anywhere; margin: 0 0 22px; user-select: all; }
+.contact .row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 22px; }
+.contact .btn { border-color: var(--bg); color: var(--bg); }
+.contact .btn:hover { background: var(--bg); color: var(--ink); }
+.contact .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; font-size: 13px; opacity: .85; }
+.contact a:focus-visible, .contact button:focus-visible { outline-color: var(--bg); }
+
+footer { border-top: 1px solid var(--line); padding-top: 40px; }
+.mark { font-family: var(--font-display); font-weight: 800; font-size: clamp(3.5rem, 17vw, 11rem); line-height: .85; letter-spacing: -.05em; margin: 0 0 28px; }
+.foot-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; font-size: 12.5px; color: var(--muted); }
+
+@media (max-width: 760px) {
+  .links { display: none; }
+  .menu-btn { display: inline-block; }
+  .hero { grid-template-columns: minmax(0, 1fr); padding-block: 40px 40px; gap: 32px; }
+  .sec { padding-block: 52px; }
+  .exp { grid-template-columns: minmax(0, 1fr); }
+  .stat { border-right: 0; border-bottom: 1px solid var(--line); }
+  .stat:last-child { border-bottom: 0; }
+  .contact { padding: 22px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cursor { animation: blink 1.1s steps(1) infinite; }
+  .dot { animation: pulse 2s ease-in-out infinite; }
+  .btn, .proj { transition: background .15s, color .15s, border-color .15s; }
+}
+@keyframes blink { 50% { opacity: 0; } }
+@keyframes pulse { 50% { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+
+<canvas id="net" aria-hidden="true"></canvas>
+
+<div class="wrap">
+  <header class="bar">
+    <a class="id" href="#top">~/bmugam <span>nairobi</span></a>
+    <nav class="links" aria-label="Sections">
+      <a href="#about">About</a>
+      <a href="#experience">Experience</a>
+      <a href="#work">Work</a>
+      <a href="#toolbox">Toolbox</a>
+      <a href="#credentials">Education</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <button class="menu-btn" id="menu-open" type="button" aria-expanded="false" aria-controls="menu">Menu</button>
+  </header>
+
+  <div class="overlay" id="menu" hidden>
+    <div class="row"><span>~/bmugam</span><button class="menu-btn" id="menu-close" type="button" style="display:inline-block">Close</button></div>
+    <ol>
+      <li><a href="#about"><i>01</i>About</a></li>
+      <li><a href="#experience"><i>02</i>Experience</a></li>
+      <li><a href="#work"><i>03</i>Work</a></li>
+      <li><a href="#toolbox"><i>04</i>Toolbox</a></li>
+      <li><a href="#credentials"><i>05</i>Education</a></li>
+      <li><a href="#contact"><i>06</i>Contact</a></li>
+    </ol>
+  </div>
+
+  <main id="top">
+    <div class="hero">
+      <div>
+        <p class="prompt"><b>bmugam@nairobi</b>:~$ whoami<span class="cursor" aria-hidden="true"></span></p>
+        <p class="kicker">&gt; IT support &amp; networking</p>
+        <h1>Brian Mugambi</h1>
+        <p class="intro">I keep networks up and people working, and I build web apps on top of them. BSc IT graduate from Maseno University, Cisco-trained, based in Nairobi.</p>
+        <div class="cta">
+          <a class="btn solid" href="#work">View work</a>
+          <a class="btn" href="#contact">Contact</a>
+          <a class="btn" href="https://github.com/Bmugam">GitHub</a>
+        </div>
+      </div>
+      <aside class="status" aria-label="Status">
+        <div class="head"><span><i class="dot"></i>Status</span><span id="clock">EAT</span></div>
+        <dl>
+          <div class="r"><dt>Now</dt><dd>Graduate, BSc Information Technology</dd></div>
+          <div class="r"><dt>Prev</dt><dd>IT Support Attaché, NSSF</dd></div>
+          <div class="r"><dt>Edu</dt><dd>Maseno University, 2025</dd></div>
+        </dl>
+      </aside>
+      <div class="scroll">&darr; Scroll</div>
+    </div>
+
+    <section class="sec" id="about">
+      <div class="sec-head"><span class="idx">01</span><span class="lab">About</span></div>
+      <h2>Connect it. Fix it. Document it.</h2>
+      <p>I'm an IT support and networking professional in Nairobi, Kenya. I've given first-line support at the National Social Security Fund and at Revere Technologies, and I hold a BSc in Information Technology from Maseno University.</p>
+      <p>My days are spent diagnosing hardware, software and connectivity faults, keeping desktops, printers and network devices running, and writing down what I fixed so the next fault takes less time. I'm Cisco-trained in routing, switching, VLANs and wireless LAN, and I write Python, JavaScript and Java for backend and frontend work.</p>
+      <div class="stats">
+        <div class="stat"><b>3</b><span>Roles: NSSF, Revere, IEBC</span></div>
+        <div class="stat"><b>2</b><span>Cisco Networking Academy courses</span></div>
+        <div class="stat"><b>2025</b><span>BSc Information Technology</span></div>
+      </div>
+    </section>
+
+    <section class="sec" id="experience">
+      <div class="sec-head"><span class="idx">02</span><span class="lab">Experience</span></div>
+      <h2>Where I've worked.</h2>
+      <article class="exp">
+        <div class="n"><b>01</b>May &ndash; Aug 2024</div>
+        <div>
+          <h3>IT Support Attaché<span class="tag">Attachment</span></h3>
+          <p class="org">National Social Security Fund (NSSF)</p>
+          <ul>
+            <li>Gave first-line support to staff, diagnosing and fixing hardware, software and connectivity issues to cut downtime.</li>
+            <li>Helped configure, install and maintain desktops, printers and network devices across departments.</li>
+            <li>Logged, tracked and resolved user tickets on the IT help desk.</li>
+            <li>Took part in routine network monitoring and basic LAN troubleshooting.</li>
+          </ul>
+        </div>
+      </article>
+      <article class="exp">
+        <div class="n"><b>02</b>Jul &ndash; Aug 2023</div>
+        <div>
+          <h3>IT Support</h3>
+          <p class="org">Revere Technologies</p>
+          <ul>
+            <li>Handled daily support requests: system setup, software installation and hardware troubleshooting.</li>
+            <li>Assisted senior engineers with network configuration, including basic switch and router setup.</li>
+            <li>Documented recurring issues and their fixes to speed up future support.</li>
+          </ul>
+        </div>
+      </article>
+      <article class="exp">
+        <div class="n"><b>03</b>Aug 2022</div>
+        <div>
+          <h3>Clerk</h3>
+          <p class="org">Independent Electoral and Boundaries Commission (IEBC)</p>
+          <ul>
+            <li>Supported data entry and verification to keep electoral records accurate.</li>
+            <li>Helped troubleshoot registration equipment during field operations.</li>
+          </ul>
+        </div>
+      </article>
+    </section>
+
+    <section class="sec" id="work">
+      <div class="sec-head"><span class="idx">03</span><span class="lab">Work</span></div>
+      <h2>Things I've built.</h2>
+      <div class="projects">
+        <article class="proj">
+          <div class="top"><span>01</span><span>Repository</span></div>
+          <h3>HomeHelp Connection</h3>
+          <p class="repo">Bmugam/homehelp-connection</p>
+          <a class="btn" href="https://github.com/Bmugam/homehelp-connection">Source &rarr;</a>
+        </article>
+        <article class="proj">
+          <div class="top"><span>02</span><span>Repository</span></div>
+          <h3>Smart Dress Chooser</h3>
+          <p class="repo">Bmugam/SmartdressChooser</p>
+          <a class="btn" href="https://github.com/Bmugam/SmartdressChooser">Source &rarr;</a>
+        </article>
+      </div>
+      <p class="more">$ more at <a href="https://github.com/Bmugam">github.com/Bmugam</a></p>
+    </section>
+
+    <section class="sec" id="toolbox">
+      <div class="sec-head"><span class="idx">04</span><span class="lab">Toolbox</span></div>
+      <h2>What I work with.</h2>
+      <div class="tools">
+        <div class="term">
+          <p class="cmd"><b>$</b> ls networking/</p>
+          <ul><li>Cisco routing &amp; switching</li><li>VLANs</li><li>Wireless LAN</li><li>TCP/IP</li><li>LAN/WAN troubleshooting</li><li>Network configuration</li></ul>
+        </div>
+        <div class="term">
+          <p class="cmd"><b>$</b> ls support/</p>
+          <ul><li>Hardware &amp; software troubleshooting</li><li>Help desk</li><li>System installation</li><li>Windows / Linux admin</li><li>Preventive maintenance</li></ul>
+        </div>
+        <div class="term">
+          <p class="cmd"><b>$</b> ls backend/</p>
+          <ul><li>Django</li><li>Node.js</li><li>REST API design</li><li>JWT auth</li><li>MySQL</li></ul>
+        </div>
+        <div class="term">
+          <p class="cmd"><b>$</b> ls frontend/</p>
+          <ul><li>React</li><li>Angular</li><li>HTML5</li><li>CSS3</li><li>JavaScript (ES6+)</li><li>Bootstrap</li></ul>
+        </div>
+        <div class="term">
+          <p class="cmd"><b>$</b> ls languages/</p>
+          <ul><li>Python</li><li>JavaScript</li><li>Java</li><li>C++</li><li>SQL</li></ul>
+        </div>
+        <div class="term">
+          <p class="cmd"><b>$</b> ls tools/</p>
+          <ul><li>Git &amp; GitHub</li><li>Windows Server</li><li>Cisco Packet Tracer</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="credentials">
+      <div class="sec-head"><span class="idx">05</span><span class="lab">Education</span></div>
+      <h2>Degree and certificates.</h2>
+      <div class="tree-box">
+<pre class="tree">$ tree ~/credentials
+<em>~/credentials</em>
+├── education/
+│   └── bsc-information-technology    <em>Maseno University · Sep 2021 – Nov 2025</em>
+└── cisco/
+    ├── it-essentials                <em>Fundamentals of IT</em>
+    └── ccna-v7-intro-to-networks    <em>Introduction to Networks</em></pre>
+      </div>
+      <p class="edu-note">Second Class Lower Division. Coursework in Computer Networks, Data Communication, Information Systems Security and IT Project Management.</p>
+    </section>
+
+    <section class="sec" id="contact">
+      <div class="sec-head"><span class="idx">06</span><span class="lab">Contact</span></div>
+      <h2>Let's connect.</h2>
+      <div class="contact">
+        <p class="big" id="email-text">bmugambi71@yahoo.com</p>
+        <div class="row">
+          <button class="btn" id="copy-email" type="button">Copy address</button>
+          <a class="btn" href="mailto:bmugambi71@yahoo.com">Open mail app</a>
+          <a class="btn" href="https://github.com/Bmugam">GitHub</a>
+        </div>
+        <div class="meta"><span>Nairobi, Kenya</span><span>Local time <span id="clock2">EAT</span></span></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p class="mark">Mugambi.</p>
+    <div class="foot-row"><span>&copy; 2026 Brian Mugambi</span><span>Last updated Nov 2026</span><span>$ whoami &rarr; Brian Mugambi, Nairobi</span></div>
+  </footer>
+</div>
+
+<script>
+(function () {
+  /* background: drifting network nodes */
+  var c = document.getElementById("net");
+  var ctx = c.getContext("2d");
+  var W = 0, H = 0, nodes = [], ink = "#f2f1ec", tick = 0, running = false;
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  function readInk() {
+    var v = getComputedStyle(document.documentElement).getPropertyValue("--ink").trim();
+    if (v) ink = v;
+  }
+  function size() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    c.width = W * dpr; c.height = H * dpr;
+    c.style.width = W + "px"; c.style.height = H + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var n = Math.round(Math.min(80, (W * H) / 20000));
+    nodes = [];
+    for (var i = 0; i < n; i++) {
+      nodes.push({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - 0.5) * 0.28, vy: (Math.random() - 0.5) * 0.28 });
+    }
+    readInk();
+  }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = ink; ctx.fillStyle = ink; ctx.lineWidth = 1;
+    var maxD = 150, i, j, a, b, dx, dy, d;
+    for (i = 0; i < nodes.length; i++) {
+      a = nodes[i];
+      for (j = i + 1; j < nodes.length; j++) {
+        b = nodes[j]; dx = a.x - b.x; dy = a.y - b.y; d = Math.sqrt(dx * dx + dy * dy);
+        if (d < maxD) {
+          ctx.globalAlpha = (1 - d / maxD) * 0.2;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha = 0.45;
+    for (i = 0; i < nodes.length; i++) {
+      ctx.beginPath(); ctx.arc(nodes[i].x, nodes[i].y, 1.8, 0, 6.2832); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+  function step() {
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > W) n.vx *= -1;
+      if (n.y < 0 || n.y > H) n.vy *= -1;
+    }
+  }
+  function loop() {
+    if (reduce.matches) { running = false; return; }
+    tick++;
+    if (tick % 40 === 0) readInk();
+    step(); draw();
+    requestAnimationFrame(loop);
+  }
+  function start() {
+    readInk(); draw();
+    if (!reduce.matches && !running) { running = true; requestAnimationFrame(loop); }
+  }
+  size(); start();
+  window.addEventListener("resize", function () { size(); draw(); });
+  try {
+    reduce.addEventListener("change", start);
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { readInk(); draw(); });
+  } catch (e) {}
+
+  /* menu */
+  var menu = document.getElementById("menu");
+  var openBtn = document.getElementById("menu-open");
+  var closeBtn = document.getElementById("menu-close");
+  function setMenu(open) {
+    menu.hidden = !open;
+    openBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    document.body.style.overflow = open ? "hidden" : "";
+    if (open) closeBtn.focus(); else openBtn.focus();
+  }
+  openBtn.addEventListener("click", function () { setMenu(true); });
+  closeBtn.addEventListener("click", function () { setMenu(false); });
+  menu.addEventListener("click", function (e) {
+    if (e.target.closest && e.target.closest("a")) { menu.hidden = true; openBtn.setAttribute("aria-expanded", "false"); document.body.style.overflow = ""; }
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !menu.hidden) setMenu(false); });
+
+  /* Nairobi clock */
+  function clock() {
+    var t = "EAT";
+    try {
+      t = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Nairobi" }).format(new Date()) + " EAT";
+    } catch (e) {}
+    document.getElementById("clock").textContent = t;
+    document.getElementById("clock2").textContent = t;
+  }
+  clock(); setInterval(clock, 30000);
+
+  /* copy email */
+  var btn = document.getElementById("copy-email");
+  var text = document.getElementById("email-text");
+  function selectText() {
+    var r = document.createRange(); r.selectNodeContents(text);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+  btn.addEventListener("click", function () {
+    var done = function () { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy address"; }, 1800); };
+    var fail = function () { selectText(); btn.textContent = "Selected, press copy"; };
+    try { navigator.clipboard.writeText(text.textContent).then(done, fail); } catch (e) { fail(); }
+  });
+})();
+</script>
+
+</body>
+</html>
